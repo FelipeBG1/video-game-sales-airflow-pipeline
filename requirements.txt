@@ -1,4 +1,8 @@
+# Project dependencies
 python-dotenv
 pandas
 sqlalchemy
 psycopg2-binary
+
+# Airflow (used via Docker)
+apache-airflow==2.4.0

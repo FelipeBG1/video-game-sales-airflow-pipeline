@@ -1,85 +1,76 @@
-import sys
-import os
-import logging
-sys.path.append('/opt/airflow/dags/sales_data_pipeline')
 from datetime import datetime, timedelta
+import logging
+import sys
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+
+sys.path.append("/opt/airflow/dags/sales_data_pipeline")
+
 from src.extract.load_data import load_data
-from src.transform.transform_data import aggregate_data, clean_data
+from src.transform.transform_data import clean_data, aggregate_data
 from src.load.save_data import save_to_db
 from src.load.read_from_db import read_from_db
 from src.validate.data_quality import validate_clean_data, validate_aggregated_data
 
+
 logging.basicConfig(
     level=logging.INFO,
-    format='%(levelname)s: %(message)s'
-    )
+    format="%(levelname)s: %(message)s"
+)
+
 logger = logging.getLogger(__name__)
 
 
-
-# def run_pipeline():
-#     logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(levelname)s: %(message)s'
-#     )
-#     logger = logging.getLogger(__name__)
-
-#     logger.info("Starting pipeline")
-
-#     logger.info("Loading raw data")
-#     df = load_data()
-
-#     logger.info("Cleaning data")
-#     df_clean = clean_data(df)
-
-#     logger.info("Validating cleaned data")
-#     validate_clean_data(df_clean)
-
-#     logger.info("Aggregating data")
-#     df_agg = aggregate_data(df_clean)
-
-#     logger.info("Validating aggregated data")
-#     validate_aggregated_data(df_agg)
-
-#     logger.info("Saving CSV files")
-#     save_data(df_clean,'data/processed/clean_sales.csv')
-#     save_data(df_agg, 'data/processed/aggregate_sales.csv')
-
-#     logger.info("Saving data to PostgreSQL")
-#     save_to_db(df=df_clean, table='games_clean')
-#     save_to_db(df=df_agg, table='sales_by_platform_year')
-
-#     logger.info("Pipeline completed successfully")
-
 default_args = {
-    "retries" : 1,
+    "retries": 1,
     "retry_delay": timedelta(minutes=2),
 }
 
 def load_clean_data():
-    logger.info("Loading and cleaning data")
+    logger.info("Starting data ingestion from CSV")
     df = load_data()
+
+    logger.info("Cleaning raw dataset")
     df_clean = clean_data(df)
+
+    logger.info("Saving cleaned data to table 'games_clean'")
     save_to_db(df=df_clean, table='games_clean')
 
+    logger.info("Load and clean step completed successfully")
+
+
 def validate_clean_table():
-    logger.info("Reading and validating data")
+    logger.info("Reading cleaned data from table 'games_clean'")
     df_clean = read_from_db("games_clean")
+
+    logger.info("Running data quality checks on cleaned data")
     validate_clean_data(df_clean)
 
+    logger.info("Clean data validation completed successfully")
+
+
 def aggregate_sales():
-    logger.info("Reading and aggregating data")
+    logger.info("Reading cleaned data from table 'games_clean'")
     df_clean = read_from_db("games_clean")
+
+    logger.info("Aggregating sales by platform and year")
     df_agg = aggregate_data(df_clean)
+
+    logger.info("Saving aggregated data to table 'sales_by_platform_year'")
     save_to_db(df=df_agg, table="sales_by_platform_year")
 
+    logger.info("Aggregation step completed successfully")
+
+
 def validate_aggregated_table():
-    logger.info("Reading and validating aggregated data")
+    logger.info("Reading aggregated data from table 'sales_by_platform_year'")
     df_agg = read_from_db("sales_by_platform_year")
+
+    logger.info("Running data quality checks on aggregated data")
     validate_aggregated_data(df_agg)
 
+    logger.info("Aggregated data validation completed successfully")
 
 
 
