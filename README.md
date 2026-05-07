@@ -13,7 +13,7 @@ The goal of this project is to simulate a real-world data engineering workflow u
 ## 🧱 Architecture
 
 ```text
-CSV File
+Raw CSV Dataset
    ↓
 Airflow DAG
    ↓
@@ -34,7 +34,13 @@ The project separates Airflow's internal metadata database from the project data
 Airflow metadata DB  → internal Airflow state
 sales_pipeline DB    → project data
 ```
+---
 
+## 📊 Airflow DAG
+
+![Airflow DAG](images/airflow_dag.png)
+
+*Airflow DAG showing the orchestration flow and task dependencies.*
 ---
 
 ## ⚙️ Tech Stack
@@ -67,7 +73,6 @@ airflow_local/
 │           └── raw/           # Source dataset
 ├── logs/
 ├── plugins/
-├── config/
 ├── docker-compose.yaml
 └── .env
 ```
@@ -109,6 +114,13 @@ load_clean_data
 
 ---
 
+## 🔄 DAG Execution
+
+![DAG Execution](images/dag_execution.png)
+
+---
+
+
 ## ✅ Data Quality Checks
 
 ### Clean Data (`games_clean`)
@@ -148,6 +160,13 @@ sales_pipeline
 This separation avoids mixing project data with Airflow internal metadata.
 
 ---
+
+## 🗄️ Database Tables
+
+![Database Tables](images/db_tables.png)
+
+---
+
 
 ## 🔁 Error Handling and Resilience
 
